@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Will You Be My Valentine?</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-image: url('cute-pastel-colour-heart-pattern-love-theme-design-for-background-wallpaper-fabric-valentine-day-wedding-ceremony-anniversary-craft-backdrop-gift-wrap-vector.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+}
+
+/* Play area */
+#playArea {
+  width: 840px;
+  height: 440px;
+  margin: 40px auto;
+  position: relative;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  padding-top: 40px;
+}
+
+#question {
+  margin: 0;
+  font-size: 2rem;
+}
+
+button {
+  font-size: 30px;
+  padding: 18px 36px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+}
+
+/* YES button */
+#yesBtn {
+  background-color: #ff4d6d;
+  color: white;
+  position: absolute;
+  left: 300px;
+  top: 220px;
+  transition: transform 0.2s ease;
+}
+
+/* NO button */
+#noBtn {
+  background-color: #ccc;
+  position: absolute;
+  left: 460px;
+  top: 220px;
+}
+
+/* Seriously NO link */
+#seriouslyNo {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  font-size: 14px;
+  color: #777;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#seriouslyNo:hover {
+  color: #ff4d6d;
+}
+</style>
+</head>
+
+<body>
+
+<div id="playArea">
+  <h1 id="question">Will you be my Valentine? ❤️</h1>
+
+  <button id="yesBtn" onclick="sayYes()">Yes</button>
+  <button id="noBtn">No</button>
+
+  <!-- Link to puzzle -->
+  <a id="seriouslyNo" href="zip.html">Seriously! NO</a>
+</div>
+
+<script>
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const playArea = document.getElementById("playArea");
+
+let yesScale = 1;
+
+/* Move NO button inside play area */
+noBtn.addEventListener("mouseover", () => {
+
+  const areaRect = playArea.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+
+  const maxX = areaRect.width - btnRect.width;
+  const maxY = areaRect.height - btnRect.height;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  noBtn.style.left = `${x}px`;
+  noBtn.style.top = `${y}px`;
+
+  yesScale += 0.1;
+  yesBtn.style.transform = `scale(${yesScale})`;
+});
+
+/* YES clicked */
+function sayYes() {
+  playArea.innerHTML = `
+    <h1 style="margin-top:120px;">Yay! ❤️</h1>
+    <p style="font-size:20px;">I knew you'd say yes 😊</p>
+  `;
+}
+
+// Check if returning from puzzle
+const params = new URLSearchParams(window.location.search);
+if(params.get("solved") === "yes"){
+  sayYes();
+}
+
+</script>
+
+</body>
+</html>

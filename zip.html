@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Last Thing...</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  text-align:center;
+  background:#fff0f6;
+}
+
+h2{
+  margin-top:20px;
+}
+
+#gameWrapper{
+  position:relative;
+  display:inline-block;
+  margin-top:20px;
+}
+
+#board{
+  display:grid;
+  grid-template-columns:repeat(11,50px);
+  grid-template-rows:repeat(5,50px);
+  gap:4px;
+}
+
+.cell{
+  width:50px;
+  height:50px;
+  background:white;
+  border-radius:6px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  font-size:18px;
+  user-select:none;
+}
+
+.block{
+  background:#333;
+}
+
+.visited{
+  background:#ffd6e7;
+}
+
+#pipeLayer{
+  position:absolute;
+  top:0;
+  left:0;
+  pointer-events:none;
+}
+
+#pipeLayer polyline{
+  fill:none;
+  stroke:#ff4d88;
+  stroke-width:16;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
+</style>
+</head>
+
+<body>
+
+<h2>Connect the numbers in order 😊</h2>
+
+<div id="gameWrapper">
+  <svg id="pipeLayer"></svg>
+  <div id="board"></div>
+</div>
+
+<script>
+
+const layout = [
+["1","x","-","3","6","-","-","-","-","-","9"],
+["-","x","-","-","-","x","x","-","-","x","x"],
+["2","-","-","-","-","7","-","-","-","-","-"],
+["4","-","-","-","-","-","x","x","x","x","-"],
+["-","-","-","5","-","-","-","-","-","-","8"]
+];
+
+const board = document.getElementById("board");
+const pipeLayer = document.getElementById("pipeLayer");
+
+let expectedNumber = 1;
+let dragging = false;
+let visitedCells = new Set();
+let pathPoints = [];
+let lastCellPos = null;
+
+function buildBoard(){
+  board.innerHTML="";
+  visitedCells.clear();
+  pathPoints=[];
+  expectedNumber = 1;
+  pipeLayer.innerHTML="";
+  lastCellPos = null;
+
+  layout.forEach((row,r)=>{
+    row.forEach((val,c)=>{
+      const cell=document.createElement("div");
+      cell.className="cell";
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+      cell.dataset.val=val;
+
+      if(val==="x"){
+        cell.classList.add("block");
+      }else if(val!=="-"){
+        cell.textContent=val;
+      }
+
+      cell.addEventListener("mousedown",startDrag);
+      cell.addEventListener("mouseenter",dragOver);
+      cell.addEventListener("touchstart",startDrag);
+      cell.addEventListener("touchmove",touchDrag);
+
+      board.appendChild(cell);
+    });
+  });
+
+  document.addEventListener("mouseup",()=>dragging=false);
+  document.addEventListener("touchend",()=>dragging=false);
+}
+
+function startDrag(e){
+  dragging=true;
+  handleCell(e.target);
+}
+
+function dragOver(e){
+  if(dragging){
+    handleCell(e.target);
+  }
+}
+
+function touchDrag(e){
+  const touch = e.touches[0];
+  const element = document.elementFromPoint(touch.clientX,touch.clientY);
+  if(element && element.classList.contains("cell")){
+    handleCell(element);
+  }
+}
+
+function handleCell(cell){
+
+  if(cell.classList.contains("block")) return;
+
+  const row = parseInt(cell.dataset.row);
+  const col = parseInt(cell.dataset.col);
+  const key = row + "," + col;
+
+  // cannot reuse a cell
+  if(visitedCells.has(key)) return;
+
+  // adjacency rule
+  if(lastCellPos !== null){
+    const rowDiff = Math.abs(row - lastCellPos.row);
+    const colDiff = Math.abs(col - lastCellPos.col);
+
+    if(rowDiff + colDiff !== 1){
+      playfulReset("Hey… no teleporting 😄 Move to a neighboring cell.");
+      return;
+    }
+  }
+
+  const val = cell.dataset.val;
+
+  // numbers must be connected in order
+  if(val !== "-" && parseInt(val) !== expectedNumber){
+    playfulReset("Slow down… numbers like being followed in order 😉");
+    return;
+  }
+
+  visitedCells.add(key);
+  lastCellPos = {row, col};
+  cell.classList.add("visited");
+
+  if(val !== "-"){
+    expectedNumber++;
+  }
+
+  addPipePoint(cell);
+
+  // completion
+  // if(expectedNumber === 10){
+  //   setTimeout(()=>{
+  //     alert("Well… looks like YES was inevitable 😌❤️");
+  //     buildBoard();
+  //   },300);
+  // }
+  if(expectedNumber === 10){
+	  setTimeout(()=>{
+	    alert("Well… looks like YES was inevitable 😌❤️");
+	    window.location.href = "index.html?solved=yes";
+	  },300);
+	}
+}
+
+function addPipePoint(cell){
+  const rect = cell.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  const x = rect.left - boardRect.left + rect.width/2;
+  const y = rect.top - boardRect.top + rect.height/2;
+
+  pathPoints.push({x,y});
+  redrawPipe();
+}
+
+function redrawPipe(){
+  pipeLayer.innerHTML="";
+
+  const rect = board.getBoundingClientRect();
+  pipeLayer.setAttribute("width", rect.width);
+  pipeLayer.setAttribute("height", rect.height);
+
+  if(pathPoints.length<2) return;
+
+  const polyline = document.createElementNS("http://www.w3.org/2000/svg","polyline");
+
+  polyline.setAttribute(
+    "points",
+    pathPoints.map(p=>`${p.x},${p.y}`).join(" ")
+  );
+
+  pipeLayer.appendChild(polyline);
+}
+
+function playfulReset(message){
+  alert(message);
+  buildBoard();
+}
+
+buildBoard();
+
+</script>
+
+</body>
+</html>
