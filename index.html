@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Will You Be My Valentine?</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-image: url('cute-pastel-colour-heart-pattern-love-theme-design-for-background-wallpaper-fabric-valentine-day-wedding-ceremony-anniversary-craft-backdrop-gift-wrap-vector.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+}
+
+h1 {
+  margin-top: 80px;
+  font-size: 2.2rem;
+}
+
+/* Limited play area */
+#playArea {
+  width: 840px;
+  height: 440px;
+  margin: 40px auto;
+  position: relative;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  padding-top: 40px;
+}
+
+#question {
+  margin: 0;
+  font-size: 2rem;
+}
+
+button {
+  font-size: 30px;
+  padding: 18px 36px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+}
+
+#yesBtn {
+  background-color: #ff4d6d;
+  color: white;
+  position: absolute;
+  left: 300px;
+  top: 220px;
+  transition: transform 0.2s ease;
+}
+
+#noBtn {
+  background-color: #ccc;
+  position: absolute;
+  left: 460px;
+  top: 220px;
+}
+</style>
+</head>
+<body>
+
+
+
+<div id="playArea">
+  <h1 id="question">Will you be my Valentine? ❤️</h1>
+  <button id="yesBtn" onclick="sayYes()">Yes</button>
+  <button id="noBtn">No</button>
+</div>
+
+<script>
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const playArea = document.getElementById("playArea");
+let yesScale = 1;
+
+// Move No button but keep inside play area
+noBtn.addEventListener("mouseover", () => {
+  const areaRect = playArea.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+
+  const maxX = areaRect.width - btnRect.width;
+  const maxY = areaRect.height - btnRect.height;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  noBtn.style.left = `${x}px`;
+  noBtn.style.top = `${y}px`;
+
+  yesScale += 0.1;
+  yesBtn.style.transform = `scale(${yesScale})`;
+});
+
+function sayYes() {
+  const playArea = document.getElementById("playArea");
+  playArea.innerHTML = `
+    <h1 style="margin-top:120px;">Yay! ❤️</h1>
+    <p style="font-size:20px;">I knew you'd say yes 😊</p>
+  `;
+}
+</script>
+
+</body>
+</html>
